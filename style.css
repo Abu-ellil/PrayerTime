@@ -42,12 +42,14 @@ body{
     width: 100%;
     background-color: #228899;
 }
-#pry-time{
+#pry-time-placeholder{
     background-color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     height: 100%;
-    font-size: 4rem;
+    font-size: 3rem;
     color: #228899;
 }
+
+
