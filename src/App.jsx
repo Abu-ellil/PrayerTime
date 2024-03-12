@@ -3,8 +3,8 @@ import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
 import Button from "@mui/material/Button";
-import MainContent from "./components/MainContent";
 import { Container } from "@mui/material";
+import MainCont from "./components/MainCont";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
         }}
       >
         <Container maxWidth="xl">
-          <MainContent />
+          <MainCont />
         </Container>
       </div>
     </>

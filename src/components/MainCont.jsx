@@ -1,20 +1,20 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Grid from "@mui/material/Unstable_Grid2";
 import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
-import Prayer from "./Prayer";
+import Prayer from "./PrayerTime";
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
+import Button from "@mui/material/Button";
 import axios from "axios";
 import moment from "moment";
-import { useState, useEffect } from "react";
-import { useForkRef } from "@mui/material";
 import "moment/dist/locale/ar-dz";
 moment.locale("ar");
-export default function MainContent() {
-  // STATES
+
+export default function MainCont() {
+  const [locationPermission, setLocationPermission] = useState(false);
   const [nextPrayerIndex, setNextPrayerIndex] = useState(2);
   const [timings, setTimings] = useState({
     Fajr: "04:20",
@@ -46,6 +46,10 @@ export default function MainContent() {
       displayName: "الدمام",
       apiName: "Dammam",
     },
+    {
+      displayName: "القاهرة",
+      apiName: "Dammam",
+    },
   ];
 
   const prayersArray = [
@@ -56,7 +60,6 @@ export default function MainContent() {
     { key: "Isha", displayName: "العشاء" },
   ];
   const getTimings = async () => {
-    console.log("calling the api");
     const response = await axios.get(
       `https://api.aladhan.com/v1/timingsByCity?country=SA&city=${selectedCity.apiName}`
     );
@@ -68,7 +71,6 @@ export default function MainContent() {
 
   useEffect(() => {
     let interval = setInterval(() => {
-      console.log("calling timer");
       setupCountdownTimer();
     }, 1000);
 
@@ -80,9 +82,41 @@ export default function MainContent() {
     };
   }, [timings]);
 
-  // const data = await axios.get(
-  // 	"https://api.aladhan.com/v1/timingsByCity?country=SA&city=Riyadh"
-  // );
+  // Function to fetch prayer times based on geolocation
+  const fetchPrayerTimesByLocation = async (latitude, longitude) => {
+    const fullDate = moment().format("DD-MM-YYYY");
+    try {
+      const response = await axios.get(
+        `http://api.aladhan.com/v1/timings/${fullDate}?latitude=${latitude}&longitude=${longitude}&method=2`
+      );
+      setTimings(response.data.data.timings);
+      setSelectedCity(latitude);
+    } catch (error) {
+      console.error("Error getting prayer times by location:", error);
+    }
+  };
+
+  // Handler for the "Get My Location" button
+  const handleGetLocation = () => {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchPrayerTimesByLocation(
+            position.coords.latitude,
+            position.coords.longitude
+          );
+          setLocationPermission(true);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          setLocationPermission(false);
+        }
+      );
+    } else {
+      console.error("Geolocation is not supported by your browser.");
+      setLocationPermission(false);
+    }
+  };
 
   const setupCountdownTimer = () => {
     const momentNow = moment();
@@ -237,6 +271,15 @@ export default function MainContent() {
             })}
           </Select>
         </FormControl>
+      </Stack>
+      <Stack
+        direction="row"
+        justifyContent={"center"}
+        style={{ marginTop: "20px" }}
+      >
+        <Button variant="contained" onClick={handleGetLocation}>
+          Get My Location
+        </Button>
       </Stack>
     </>
   );
